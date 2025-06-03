@@ -36,6 +36,85 @@
 
 <script>
 //Your code goes here 
+	const container = document.querySelector('.items');
+const cubes = document.querySelectorAll('.item');
+
+let selectedCube = null;
+let offsetX = 0;
+let offsetY = 0;
+
+// Make container position relative to allow absolute positioning inside
+container.style.position = 'relative';
+
+// Set all cubes to absolute position so we can move them freely
+cubes.forEach(cube => {
+  const rect = cube.getBoundingClientRect();
+  const containerRect = container.getBoundingClientRect();
+  
+  // Calculate initial position relative to container
+  const left = rect.left - containerRect.left + container.scrollLeft;
+  const top = rect.top - containerRect.top + container.scrollTop;
+  
+  cube.style.position = 'absolute';
+  cube.style.left = `${left}px`;
+  cube.style.top = `${top}px`;
+  cube.style.margin = '0'; // Remove any margin for consistency
+});
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function onMouseDown(e) {
+  if (!e.target.classList.contains('item')) return;
+
+  selectedCube = e.target;
+
+  // Calculate offset between mouse position and top-left corner of the cube
+  const cubeRect = selectedCube.getBoundingClientRect();
+  offsetX = e.clientX - cubeRect.left;
+  offsetY = e.clientY - cubeRect.top;
+
+  // Add active class to container for cursor style
+  container.classList.add('active');
+
+  // Prevent text selection
+  e.preventDefault();
+}
+
+function onMouseMove(e) {
+  if (!selectedCube) return;
+
+  const containerRect = container.getBoundingClientRect();
+
+  // Calculate new position relative to container
+  let newLeft = e.clientX - containerRect.left - offsetX + container.scrollLeft;
+  let newTop = e.clientY - containerRect.top - offsetY + container.scrollTop;
+
+  // Boundary constraints
+  const maxLeft = container.clientWidth - selectedCube.offsetWidth;
+  const maxTop = container.clientHeight - selectedCube.offsetHeight;
+
+  newLeft = clamp(newLeft, 0, maxLeft);
+  newTop = clamp(newTop, 0, maxTop);
+
+  // Apply new position
+  selectedCube.style.left = `${newLeft}px`;
+  selectedCube.style.top = `${newTop}px`;
+}
+
+function onMouseUp(e) {
+  if (selectedCube) {
+    // Remove active class and release cube
+    container.classList.remove('active');
+    selectedCube = null;
+  }
+}
+
+container.addEventListener('mousedown', onMouseDown);
+window.addEventListener('mousemove', onMouseMove);
+window.addEventListener('mouseup', onMouseUp);
+
 </script>
 
   </body>
